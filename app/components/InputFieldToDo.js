@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from "axios";
+import { useAuth } from '@/context/AuthContext';
 
 export default function InputFieldToDo({ onAdd, categories }) {
     const [inputValue, setInputValue] = useState('');
@@ -11,8 +12,9 @@ export default function InputFieldToDo({ onAdd, categories }) {
     const [date, setDate] = useState('');
 
     const containerRef = useRef(null);
-    const userID = localStorage.getItem('userId');
-    const token = localStorage.getItem('jwt');
+    const { userData } = useAuth();
+    const userID = userData.userId;
+    const token = userData.token;
 
     const handleAdd = async () => {
         if (inputValue.trim() && category && date) {
@@ -25,7 +27,7 @@ export default function InputFieldToDo({ onAdd, categories }) {
             };
 
             try {
-                const response = await axios.post('http://localhost:8080/items', newTask, {
+                const response = await axios.post('http://129.151.249.132:8080/items', newTask, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json'

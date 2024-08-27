@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { useAuth } from '@/context/AuthContext';
 
 const categoryColors = {
     Work: 'bg-blue-500',
@@ -16,7 +17,8 @@ export default function TodoItem({ id, task, category, date, onDelete, onUpdate,
     const [editCategory, setEditCategory] = useState(category);
     const [editDate, setEditDate] = useState(date ? new Date(date).toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10));
 
-    const token = localStorage.getItem('jwt');
+    const { userData } = useAuth();
+    const token = userData.token;
 
     useEffect(() => {
         if (isEditing) {
@@ -39,12 +41,12 @@ export default function TodoItem({ id, task, category, date, onDelete, onUpdate,
                 id,
                 name: editTask,
                 date: editDate,
-                customerId: localStorage.getItem('userId'),
+                customerId: userData.userId,
                 categoryId: categories.find(cat => cat.name === editCategory).id,
                 status: 'new'  // Or retain the current status if you're tracking it
             };
 
-            await axios.put('http://localhost:8080/items', updatedTask, {
+            await axios.put('http://129.151.249.132:8080/items', updatedTask, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -60,7 +62,7 @@ export default function TodoItem({ id, task, category, date, onDelete, onUpdate,
 
     const handleDeleteTask = async () => {
         try {
-            await axios.delete(`http://localhost:8080/items/${id}`, {
+            await axios.delete(`http://129.151.249.132:8080/items/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

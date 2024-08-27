@@ -1,23 +1,21 @@
-# Use the official Node.js image as a base image
-FROM node:18-alpine
+FROM --platform=linux/arm64 node:18-alpine
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the container
 COPY package*.json ./
 
-# Install dependencies
+# Just try to run a simple command to check if it's an architecture issue
+RUN echo "Test" > /test.txt && cat /test.txt
+
+# Proceed with the rest if above steps work
 RUN npm install
 
-# Copy the rest of the application code to the container
 COPY . .
 
-# Build the Next.js application
+RUN chmod +x node_modules/.bin/next
+
 RUN npm run build
 
-# Expose port 3000 to the outside world
 EXPOSE 3000
 
-# Start the Next.js application
 CMD ["npm", "run", "start"]

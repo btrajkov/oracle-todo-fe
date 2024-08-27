@@ -5,6 +5,7 @@ import { Button, Card, CardContent, CardActions, Typography, Grid, Dialog, Dialo
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useAuth } from '@/context/AuthContext';
 
 const ITEMS_PER_PAGE = 3;
 
@@ -16,12 +17,13 @@ export default function TaskBoardPopup({ onClose, onUpdateStatus, onUpdateTask, 
     const [pageInProgress, setPageInProgress] = useState(0);
     const [pageDone, setPageDone] = useState(0);
 
-    const userID = localStorage.getItem('userId');
-    const token = localStorage.getItem('jwt');
+    const { userData } = useAuth();
+    const userID = userData.userId;
+    const token = userData.token;
 
     const fetchTasks = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/items/user/${userID}`, {
+            const response = await axios.get(`http://129.151.249.132:8080/items/user/${userID}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -38,7 +40,7 @@ export default function TaskBoardPopup({ onClose, onUpdateStatus, onUpdateTask, 
 
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/categories', {
+                const response = await axios.get('http://129.151.249.132:8080/categories', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -71,7 +73,7 @@ export default function TaskBoardPopup({ onClose, onUpdateStatus, onUpdateTask, 
     const handleStatusChange = async (task, status) => {
         try {
             const updatedTask = { ...task, status };
-            await axios.put(`http://localhost:8080/items/status`, updatedTask, {
+            await axios.put(`http://129.151.249.132:8080/items/status`, updatedTask, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -98,7 +100,7 @@ export default function TaskBoardPopup({ onClose, onUpdateStatus, onUpdateTask, 
 
     const handleEditSave = async () => {
         try {
-            await axios.put(`http://localhost:8080/items`, editingTask, {
+            await axios.put(`http://129.151.249.132:8080/items`, editingTask, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -120,7 +122,7 @@ export default function TaskBoardPopup({ onClose, onUpdateStatus, onUpdateTask, 
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/items/${id}`, {
+            await axios.delete(`http://129.151.249.132:8080/items/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

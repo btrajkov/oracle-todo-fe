@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useContext } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import InputFieldToDo from './InputFieldToDo';
 import TodoItem from './TodoItem';
 import TaskBoardPopup from './TaskBoardPopup';
 import { Button } from '@mui/material';
-import { useAuth } from '../../context/AuthContext';
+import { AuthProvider, useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 
@@ -14,7 +14,7 @@ import { toast, ToastContainer } from 'react-toastify';
 const ITEMS_PER_PAGE = 6;
 
 export default function TodoLayout() {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, userData } = useAuth();
     const [tasks, setTasks] = useState([]);
     const [categories, setCategories] = useState([]);
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -22,15 +22,11 @@ export default function TodoLayout() {
     const [currentPage, setCurrentPage] = useState(0);
     const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
 
-    const [userID, setUserID] = useState(null);
-    const [token, setToken] = useState(null);
-
     const fetchTasks = async () => {
-        if (!userID || !token) return;
         try {
-            const response = await axios.get(`http://localhost:8080/items/user/${userID}`, {
+            const response = await axios.get(`http://129.151.249.132:8080/items/user/${userData.userId}`, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${userData.token}`
                 }
             });
             setTasks(response.data);
@@ -40,34 +36,24 @@ export default function TodoLayout() {
         }
     };
 
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get('http://129.151.249.132:8080/categories', {
+                headers: {
+                    Authorization: `Bearer ${userData.token}`
+                }
+            });
+            setCategories(response.data);
+            console.log(response.data)
+        } catch (error) {
+            console.error("Failed to fetch categories:", error);
+        }
+    };
+
     useEffect(() => {
-
-        if (typeof window !== "undefined") {
-            const storedUserID = localStorage.getItem('userId');
-            const storedToken = localStorage.getItem('jwt');
-            setUserID(storedUserID);
-            setToken(storedToken);
-        }
-
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get('http://localhost:8080/categories', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                setCategories(response.data);
-                console.log(response.data)
-            } catch (error) {
-                console.error("Failed to fetch categories:", error);
-            }
-        };
-
-        if (userID && token) {
-            fetchTasks();
-            fetchCategories();
-        }
-    }, [userID, token]);
+        fetchTasks();
+        fetchCategories();
+    }, [userData]);
 
     const handleAddTask = () => {
         fetchTasks();  // Simply refetch the tasks after a  one is added
